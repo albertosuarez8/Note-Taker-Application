@@ -21,7 +21,36 @@ app.get('/notes', (req, res) => {
 });
 
 app.get('/api/notes', (req, res) => {
-  res.json(db);
+  fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.json(JSON.parse(data));
+    }
+  })
+})
+
+app.post('/api/notes', (req, res) => {
+  const newNote = req.body;
+  fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+    } else {
+
+      const parsedNotes = JSON.parse(data);
+
+      parsedNotes.push(newNote);
+
+      fs.writeFile(
+        './db/db.json',
+        JSON.stringify(parsedNotes, null, 4),
+        (writeErr) =>
+          writeErr
+            ? console.error(writeErr)
+            : res.status(200).send("Added Successfully")
+      );
+    }
+  });
 })
 
 app.listen(PORT, () => {
