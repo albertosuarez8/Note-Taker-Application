@@ -38,7 +38,7 @@ app.post('/api/notes', (req, res) => {
     } else {
 
       const parsedNotes = JSON.parse(data);
-
+      newNote.id = uuid();
       parsedNotes.push(newNote);
 
       fs.writeFile(
@@ -53,6 +53,34 @@ app.post('/api/notes', (req, res) => {
   });
 })
 
+app.delete('/api/notes/:id', (req, res) => {
+  const { id } = req.params;
+
+  fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+    } else {
+      let parsedNotes = JSON.parse(data);
+      let noteIndex = parsedNotes.findIndex(n => n.id == id);
+      parsedNotes.splice(noteIndex, 1);
+      fs.writeFile(
+        './db/db.json',
+        JSON.stringify(parsedNotes, null, 4),
+        (writeErr) =>
+          writeErr
+            ? console.error(writeErr)
+            : res.status(200).send("Deleted Successfully")
+      );
+    }
+  })
+}) 
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`)
 })
+
+const uuid = () => {
+  return Math.floor((1 + Math.random()) * 0x10000)
+    .toString(16)
+    .substring(1);
+};
